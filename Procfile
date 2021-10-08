@@ -1,0 +1,1 @@
+worker: python taxi_bot.py
