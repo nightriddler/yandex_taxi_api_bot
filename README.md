@@ -81,7 +81,7 @@ python -m venv venv
 source venv/Scripts/activate 
 pip install -r requirements.txt
 ```
-3. В папке `yandex_taxi_api_bot` с проектом создаем файл `.env` с переменными окружения:
+3. В папке с проектом создаем файл `.env` с переменными окружения:
 ```
 YA_TAXI_TOKEN=<токен-из-личного-кабинета>
 ID_CLIENT_TAXI=<ID-клиента-из-личного-кабинета>
