@@ -3,14 +3,11 @@ import sys
 from logging import StreamHandler
 
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (CallbackQueryHandler, Filters, MessageHandler,
-                          Updater)
+from telegram.ext import CallbackQueryHandler, Filters, MessageHandler, Updater
 from telegram.ext.commandhandler import CommandHandler
 
-from constans import (BOT_TELEGRAM_TOKEN, ID_CLIENT_TAXI,
-                      TELEGRAM_CHAT_ID)
-from order_comands import (get_balance_manual, get_employees_all_time,
-                           get_employees_last_month, get_employees_year,
+from constans import BOT_TELEGRAM_TOKEN, ID_CLIENT_TAXI, TELEGRAM_CHAT_ID
+from order_comands import (get_balance_manual, get_employees_statics,
                            get_last_order)
 
 bot = Bot(token=BOT_TELEGRAM_TOKEN)
@@ -25,19 +22,19 @@ def button(update, _):
         query.edit_message_text(text=get_balance_manual(ID_CLIENT_TAXI))
     elif variant == 'last_order':
         query.answer()
-        query.edit_message_text(text=get_last_order(ID_CLIENT_TAXI))
-    # elif variant == 'total_month':
-    #     query.answer()
-    #     query.edit_message_text(text=get_total_month(ID_CLIENT_TAXI))
+        query.edit_message_text(text=get_last_order(ID_CLIENT_TAXI, 6))
     elif variant == 'employees_last_month':
         query.answer()
-        query.edit_message_text(text=get_employees_last_month(ID_CLIENT_TAXI))
+        query.edit_message_text(
+            text=get_employees_statics(ID_CLIENT_TAXI, 'month'))
     elif variant == 'employees_last_year':
         query.answer()
-        query.edit_message_text(text=get_employees_year(ID_CLIENT_TAXI))
+        query.edit_message_text(
+            text=get_employees_statics(ID_CLIENT_TAXI, 'year'))
     elif variant == 'employees_all_time':
         query.answer()
-        query.edit_message_text(text=get_employees_all_time(ID_CLIENT_TAXI))
+        query.edit_message_text(
+            text=get_employees_statics(ID_CLIENT_TAXI, 'all'))
 
 
 def start(update, context):
@@ -48,9 +45,6 @@ def start(update, context):
         [
             InlineKeyboardButton(
                 "Последние 5 заказов", callback_data='last_order')],
-        # [
-        #     InlineKeyboardButton(
-        #         "Расходы за месяц", callback_data='total_month')],
         [
             InlineKeyboardButton(
                 "Расходы за месяц",
