@@ -15,7 +15,7 @@ def get_info_order(client: ID_CLIENT_TAXI, response: json):
     cost_with_vat = response.get('cost_with_vat')
 
     date_dt = datetime.datetime.strptime(
-        response.get('due_date'), '%Y-%m-%dT%H:%M:%S')
+        response.get('finished_date'), '%Y-%m-%dT%H:%M:%S')
     date = date_dt.strftime('%d.%m.%Y %H:%M:%S')
 
     get_distance = get_response_orders(
@@ -60,7 +60,7 @@ def get_balance_manual(client: ID_CLIENT_TAXI):
             'Can not get name or currence_sign in response client')
 
     return (f'{SYMBOLS["case"]} {name}: {balance} {currency_sign}\n'
-            f'Доступный лимит: {PAYMENT_LIMIT} {currency_sign}\n'
+            f'Лимит: {PAYMENT_LIMIT} {currency_sign}\n'
             f'Статус: {status}')
 
 
