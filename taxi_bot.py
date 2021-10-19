@@ -22,7 +22,7 @@ def button(update, _):
         query.edit_message_text(text=get_balance_manual(ID_CLIENT_TAXI))
     elif variant == 'last_order':
         query.answer()
-        query.edit_message_text(text=get_last_order(ID_CLIENT_TAXI, 6))
+        query.edit_message_text(text=get_last_order(ID_CLIENT_TAXI, 5))
     elif variant == 'employees_last_month':
         query.answer()
         query.edit_message_text(
@@ -44,7 +44,7 @@ def start(update, context):
                 "Баланс Яндекс.Такси", callback_data='balance')],
         [
             InlineKeyboardButton(
-                "Последние 5 заказов", callback_data='last_order')],
+                "Последние заказы", callback_data='last_order')],
         [
             InlineKeyboardButton(
                 "Расходы за месяц",
@@ -66,9 +66,6 @@ def help(update, context):
 
 
 def main():
-    print(TELEGRAM_CHAT_ID)
-    print(type(TELEGRAM_CHAT_ID))
-
     logging.basicConfig(
         level=logging.DEBUG,
         format='%(asctime)s, %(levelname)s, %(message)s, %(name)s'
