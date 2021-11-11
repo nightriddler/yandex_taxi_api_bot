@@ -2,9 +2,9 @@ import datetime
 import json
 import logging
 
-from constans import (ID_CLIENT_TAXI, PAYMENT_LIMIT, SYMBOLS, TAXI_CLASS,
-                      YA_TAXI_TOKEN)
-from response_comands import get_response_client, get_response_orders
+from constans import ID_CLIENT_TAXI, SYMBOLS, TAXI_CLASS, YA_TAXI_TOKEN
+from response_comands import (get_response_client, get_response_client_balance,
+                              get_response_orders)
 
 
 def get_info_order(client: ID_CLIENT_TAXI, response: json):
@@ -38,29 +38,33 @@ def get_info_order(client: ID_CLIENT_TAXI, response: json):
 
 def get_balance_manual(client: ID_CLIENT_TAXI):
     '''Баланс клиента.'''
-    response = get_response_client(client, YA_TAXI_TOKEN)
+    response_balance = get_response_client_balance(client, YA_TAXI_TOKEN)
+    response_client = get_response_client(client, YA_TAXI_TOKEN)
 
-    balance = response.json().get(
-        'services')['drive']['contract_info']['balance']
+    balance = response_balance.json().get(
+        'contracts')[0]['balances']['balance']
+    payment_limit = response_balance.json().get(
+        'contracts')[0]['settings']['prepaid_deactivate_threshold']
 
     if balance is None:
         logging.error('Can not get "balance".')
         return 'Ошибка. Не удается получить значение "balance".'
+
     status = 'Активный'
-    if float(balance) < PAYMENT_LIMIT:
+    if float(balance) < float(payment_limit):
         status = 'Активный, но превышен лимит задолженности'
-    if response.json()['is_active'] is False:
+    if response_client.json().get('is_active') is False:
         status = 'Заблокирован'
 
-    name = response.json().get('name')
-    currency_sign = response.json().get('currency_sign')
+    name = response_client.json().get('name')
+    currency_sign = response_client.json().get('currency_sign')
 
     if (name and currency_sign) is None:
         logging.exception(
             'Can not get name or currence_sign in response client')
 
     return (f'{SYMBOLS["case"]} {name}: {balance} {currency_sign}\n'
-            f'Лимит: {PAYMENT_LIMIT} {currency_sign}\n'
+            f'Лимит: {payment_limit} {currency_sign}\n'
             f'Статус: {status}')
 
 

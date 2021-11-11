@@ -32,6 +32,18 @@ def get_response_orders(
     return response
 
 
+def get_response_client_balance(client, token):
+    '''Информация о балансе.'''
+    try:
+        response = requests.get(
+            f'https://business.taxi.yandex.ru/api/1.0/client/{client}/contracts/',
+            headers={'Authorization': token})
+    except RequestException:
+        logging.exception('Can not get response client.')
+        return {}
+    return response
+
+
 def get_response_client(client, token):
     '''Информация о клиенте.'''
     try:
