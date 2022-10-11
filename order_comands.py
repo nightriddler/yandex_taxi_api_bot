@@ -1,16 +1,16 @@
 import datetime
 import json
 import logging
+from typing import Tuple
 
-from constans import ID_CLIENT_TAXI, SYMBOLS, TAXI_CLASS, YA_TAXI_TOKEN
-from response_comands import (
-    get_response_client,
-    get_response_client_balance,
-    get_response_orders,
-)
+from requests import Response
+
+from constans import SYMBOLS, TAXI_CLASS, YA_TAXI_TOKEN
+from response_comands import (get_response_client, get_response_client_balance,
+                              get_response_orders)
 
 
-def clear_data(data: dict):
+def get_clear_data(data: str) -> str or None:
     """Получение короткой читаемой информации."""
     try:
         current_list = data.split(", ")
@@ -23,14 +23,29 @@ def clear_data(data: dict):
     return ", ".join(current_list[interval:])
 
 
-def get_info_order(client: ID_CLIENT_TAXI, response: json):
-    """Информация по заказу."""
+def get_balance_and_limit_and_curr_sign(
+    client: str, token: str
+) -> Tuple[int, int, int]:
+    """Получить кортеж из баланса, лимита и символа валюты."""
+    response_balance = get_response_client_balance(client, token)
+    response_client = get_response_client(client, token)
+
+    balance = response_balance.json().get("contracts")[0]["balances"]["balance"]
+    payment_limit = response_balance.json().get("contracts")[0]["settings"][
+        "prepaid_deactivate_threshold"
+    ]
+    currency_sign = response_client.json().get("currency_sign")
+    return (balance, payment_limit, currency_sign)
+
+
+def get_info_order(client: str, response: json) -> str:
+    """Получить строку информаии по заказу."""
     name = response.get("corp_user")["fullname"]
     source_start = response.get("source")["fullname"]
     destination = response.get("destination")["fullname"]
 
-    source_start = clear_data(source_start)
-    destination = clear_data(destination)
+    source_start = get_clear_data(source_start)
+    destination = get_clear_data(destination)
 
     cost_with_vat = response.get("cost_with_vat")
 
@@ -57,15 +72,18 @@ def get_info_order(client: ID_CLIENT_TAXI, response: json):
     )
 
 
-def get_balance_manual(client: ID_CLIENT_TAXI):
-    """Баланс клиента."""
-    response_balance = get_response_client_balance(client, YA_TAXI_TOKEN)
+def get_balance_manual(client: str) -> str:
+    """Получить строку баланса клиента."""
+    balance, payment_limit, currency_sign = get_balance_and_limit_and_curr_sign(
+        client, YA_TAXI_TOKEN
+    )
+    # response_balance = get_response_client_balance(client, YA_TAXI_TOKEN)
     response_client = get_response_client(client, YA_TAXI_TOKEN)
 
-    balance = response_balance.json().get("contracts")[0]["balances"]["balance"]
-    payment_limit = response_balance.json().get("contracts")[0]["settings"][
-        "prepaid_deactivate_threshold"
-    ]
+    # balance = response_balance.json().get("contracts")[0]["balances"]["balance"]
+    # payment_limit = response_balance.json().get("contracts")[0]["settings"][
+    #     "prepaid_deactivate_threshold"
+    # ]
 
     if balance is None:
         logging.error('Can not get "balance".')
@@ -78,7 +96,7 @@ def get_balance_manual(client: ID_CLIENT_TAXI):
         status = "Заблокирован"
 
     name = response_client.json().get("name")
-    currency_sign = response_client.json().get("currency_sign")
+    # currency_sign = response_client.json().get("currency_sign")
 
     if (name and currency_sign) is None:
         logging.exception("Can not get name or currence_sign in response client")
@@ -90,8 +108,8 @@ def get_balance_manual(client: ID_CLIENT_TAXI):
     )
 
 
-def get_last_order(client: ID_CLIENT_TAXI, amount_orders: int()):
-    """Последние "amount_orders" заказов."""
+def get_last_order(client: str, amount_orders: int) -> str:
+    """Получить строку из последних "amount_orders" заказов."""
     response = get_response_orders(client, YA_TAXI_TOKEN)
     answer = ""
     orders = response.json().get("items")
@@ -106,8 +124,8 @@ def get_last_order(client: ID_CLIENT_TAXI, amount_orders: int()):
     return answer
 
 
-def calculate_orders_by_period(response, start_time=None):
-    """Расчет суммы заказов по сотруднику за указанный период."""
+def calculate_orders_by_period(response: Response, start_time: int = None) -> str:
+    """Получение строки результата расчета суммы заказов по сотруднику за указанный период."""
     now = datetime.datetime.now()
     starting_point = now - datetime.timedelta(days=start_time)
 
@@ -154,8 +172,8 @@ def calculate_orders_by_period(response, start_time=None):
     return result
 
 
-def get_employees_statics(client: ID_CLIENT_TAXI, period: str):
-    """Статистика заказов за указанный период по сотрудникам."""
+def get_employees_statics(client: str, period: str) -> str:
+    """Получить строку статистики заказов за указанный период всех сотрудников."""
     response = get_response_orders(client, YA_TAXI_TOKEN, limit=0)
     if period == "month":
         return calculate_orders_by_period(response, start_time=30)

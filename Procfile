@@ -1,1 +1,1 @@
-worker: python taxi_bot.py
+worker: python main.py
