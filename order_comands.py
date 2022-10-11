@@ -6,8 +6,11 @@ from typing import Tuple
 from requests import Response
 
 from constans import SYMBOLS, TAXI_CLASS, YA_TAXI_TOKEN
-from response_comands import (get_response_client, get_response_client_balance,
-                              get_response_orders)
+from response_comands import (
+    get_response_client,
+    get_response_client_balance,
+    get_response_orders,
+)
 
 
 def get_clear_data(data: str) -> str or None:
@@ -77,13 +80,7 @@ def get_balance_manual(client: str) -> str:
     balance, payment_limit, currency_sign = get_balance_and_limit_and_curr_sign(
         client, YA_TAXI_TOKEN
     )
-    # response_balance = get_response_client_balance(client, YA_TAXI_TOKEN)
     response_client = get_response_client(client, YA_TAXI_TOKEN)
-
-    # balance = response_balance.json().get("contracts")[0]["balances"]["balance"]
-    # payment_limit = response_balance.json().get("contracts")[0]["settings"][
-    #     "prepaid_deactivate_threshold"
-    # ]
 
     if balance is None:
         logging.error('Can not get "balance".')
@@ -96,7 +93,6 @@ def get_balance_manual(client: str) -> str:
         status = "Заблокирован"
 
     name = response_client.json().get("name")
-    # currency_sign = response_client.json().get("currency_sign")
 
     if (name and currency_sign) is None:
         logging.exception("Can not get name or currence_sign in response client")
