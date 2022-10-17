@@ -13,7 +13,7 @@ def check_balance(context: CallbackContext) -> None:
     balance, payment_limit, currency_sign = get_balance_and_limit_and_curr_sign(
         ID_CLIENT_TAXI, YA_TAXI_TOKEN
     )
-    remainder = abs(float(payment_limit)) - abs(float(balance))
+    remainder = round(abs(float(payment_limit)) - abs(float(balance)), 2)
     if remainder <= NOTIFICATIONS_LIMIT:
         for user_id in NOTIFICATIONS_CHAT_ID:
             context.bot.send_message(
